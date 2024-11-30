@@ -15,6 +15,7 @@
 
 	127.0.0.1       synapse1
 	127.0.0.1       synapse2
+	127.0.0.1				homeserver
 
 ## Root CA
 
