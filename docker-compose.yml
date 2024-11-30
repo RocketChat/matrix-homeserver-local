@@ -121,9 +121,10 @@ services:
     build:
       context: ../homeserver
     container_name: homeserver
-    # entrypoint: sh -c "update-ca-certificates && ./app"
+    entrypoint: bun run --watch index.ts
     volumes:
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
+      - ../homeserver:/usr/src/app
     networks:
       - matrix-network
     ports:

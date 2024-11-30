@@ -1,6 +1,6 @@
-## Accessing Element
+## Clone the homeserver repo to the parent directory
 
-Go to http://localhost:8080.
+	git clone https://github.com/ggazzo/homeserver.git ../homeserver
 
 ## Creating users via command line
 
@@ -31,3 +31,7 @@ Source: https://dkm10.hashnode.dev/install-certificates-on-wsl2
 
 	/usr/local/share/ca-certificates
 	sudo update-ca-certificates
+
+## Accessing Element
+
+Go to http://localhost:8080.
