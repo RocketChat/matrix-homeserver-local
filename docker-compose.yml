@@ -67,11 +67,15 @@ services:
 
   synapse1:
     image: matrixdotorg/synapse:latest
+    # build:
+    #   context: ../synapse
+    #   dockerfile: ../synapse/docker/Dockerfile
     container_name: synapse1
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./synapse1:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
+      # - ../synapse/synapse:/synapse/synapse/
     networks:
       - matrix-network
     # ports:
@@ -86,11 +90,15 @@ services:
 
   synapse2:
     image: matrixdotorg/synapse:latest
+    # build:
+    #   context: ../synapse
+    #   dockerfile: ../synapse/docker/Dockerfile
     container_name: synapse2
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./synapse2:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
+      # - ../synapse/synapse:/synapse/synapse/
     networks:
       - matrix-network
     # ports:
