@@ -1,0 +1,9 @@
+tls:
+  certificates:
+    # synapse1
+    - certFile: "/etc/traefik/certs/synapse1.pem"
+      keyFile: "/etc/traefik/certs/synapse1-key.pem"
+
+    # synapse2
+    - certFile: "/etc/traefik/certs/synapse2.pem"
+      keyFile: "/etc/traefik/certs/synapse2-key.pem"

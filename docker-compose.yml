@@ -1,0 +1,121 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: traefik:v2.9
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.matrix.address=:8448"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8448:8448"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
+      - ./traefik/certs:/etc/traefik/certs:ro
+    networks:
+      matrix-network:
+        aliases:
+          - synapse1
+          - synapse2
+
+  synapse1_well_known:
+    image: nginx:alpine
+    container_name: synapse1_well_known
+    volumes:
+      - ./traefik/well-known/synapse1/.well-known:/usr/share/nginx/html/.well-known:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.synapse1_wk.rule=Host(`synapse1`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.routers.synapse1_wk.entrypoints=websecure"
+      - "traefik.http.routers.synapse1_wk.tls=true"
+    networks:
+      - matrix-network
+
+  synapse2_well_known:
+    image: nginx:alpine
+    container_name: synapse2_well_known
+    volumes:
+      - ./traefik/well-known/synapse2/.well-known:/usr/share/nginx/html/.well-known:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.synapse2_wk.rule=Host(`synapse2`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.routers.synapse2_wk.entrypoints=websecure"
+      - "traefik.http.routers.synapse2_wk.tls=true"
+    networks:
+      - matrix-network
+
+  synapse1_a:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse1_a
+    entrypoint: sh -c "update-ca-certificates && /start.py"
+    volumes:
+      - ./synapse1:/data
+      - ./traefik/certs/ca:/usr/local/share/ca-certificates
+    networks:
+      - matrix-network
+    # ports:
+    #   - "8008:8008"  # Client and federation port for synapse1
+    #   - "8448:8448"  # Client and federation port for synapse1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.synapse1_a.rule=Host(`synapse1`)"
+      # - "traefik.http.routers.synapse1.entrypoints=web"
+      - "traefik.http.routers.synapse1_a.entrypoints=websecure"
+      - "traefik.http.routers.synapse1_a.tls=true"
+      # - "traefik.http.routers.synapse1.tls.certresolver=myresolver"
+      - "traefik.http.services.synapse1_a.loadbalancer.server.port=8448"
+      # - "traefik.tcp.routers.synapse1_federation.rule=HostSNI(`synapse1`)"
+      # - "traefik.tcp.routers.synapse1_federation.entrypoints=matrix"
+      # - "traefik.tcp.routers.synapse1_federation.tls=true"
+      # # - "traefik.tcp.routers.synapse1_federation.tls.certresolver=myresolver"
+      # - "traefik.tcp.services.synapse1_federation.loadbalancer.server.port=8448"
+
+  synapse2_a:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse2_a
+    entrypoint: sh -c "update-ca-certificates && /start.py"
+    volumes:
+      - ./synapse2:/data
+      - ./traefik/certs/ca:/usr/local/share/ca-certificates
+    networks:
+      - matrix-network
+    # ports:
+    #   - "8009:8009"  # Client and federation port for synapse2
+    #   - "8449:8449"  # Client and federation port for synapse2
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.synapse2_a.rule=Host(`synapse2`)"
+      # - "traefik.http.routers.synapse2.entrypoints=web"
+      - "traefik.http.routers.synapse2_a.entrypoints=websecure"
+      - "traefik.http.routers.synapse2_a.tls=true"
+      # - "traefik.http.routers.synapse2.tls.certresolver=myresolver"
+      - "traefik.http.services.synapse2_a.loadbalancer.server.port=8448"
+      # - "traefik.tcp.routers.synapse2_federation.rule=HostSNI(`synapse2`)"
+      # - "traefik.tcp.routers.synapse2_federation.entrypoints=matrix"
+      # - "traefik.tcp.routers.synapse2_federation.tls=true"
+      # # - "traefik.tcp.routers.synapse2_federation.tls.certresolver=myresolver"
+      # - "traefik.tcp.services.synapse2_federation.loadbalancer.server.port=8448"
+
+  element:
+    image: vectorim/element-web
+    container_name: element
+    ports:
+      - "8080:80"
+    volumes:
+      - ./element/config.json:/app/config.json
+    networks:
+      - matrix-network
+    depends_on:
+      - synapse1_a
+      - synapse2_a
+
+networks:
+  matrix-network:
+    driver: bridge

@@ -1,0 +1,87 @@
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+server_name: "synapse1"
+pid_file: /data/homeserver.pid
+# listeners:
+#   - port: 8448
+#     tls: false
+#     type: http
+#     x_forwarded: false
+#     resources:
+#       - names: [client, federation]
+#         # compress: false
+#     bind_addresses: ['0.0.0.0']
+#     headers:
+#       'Access-Control-Allow-Origin': ['*']
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+  - port: 8448
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [federation, client]
+
+use_x_forwarded_for: true
+
+database:
+  name: sqlite3
+  args:
+    database: /data/homeserver.db
+log_config: "/data/synapse1.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "3l5H.Y5urc5@gKwYMe2^abk@nf.U_M6iyMgP,j&OL6pcSGrUQE"
+report_stats: false
+macaroon_secret_key: "3II&OLx=,6RcC&E~iksWi:tUU4J.~reK:MdU&JAPhlaGIL*+IA"
+form_secret: "B2EuUMKfg&.BsU;#DZ9;E,baB^wc=lV--F_PwkRLZvk=LHk+U4"
+signing_key_path: "/data/synapse1.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+    accept_keys_insecurely: true
+federation_domain_whitelist:
+  - synapse2:8448
+  - synapse2:8008
+  - synapse2:80
+  - synapse2:443
+  - synapse2
+federation_client_minimum_tls_version: 1
+federation_verify_certificates: false
+federation_certificate_verification_whitelist:
+  - synapse2:8448
+  - synapse2:8008
+  - synapse2:80
+  - synapse2:443
+  - synapse2
+suppress_key_server_warning: true
+enable_registration: true
+enable_registration_without_verification: true
+password_config:
+  enabled: true
+  localdb_enabled: true
+  policy:
+    minimum_length: 1
+    require_lowercase: false
+    require_uppercase: false
+    require_digit: false
+    require_symbol: false
+
+# Optionally, add your Docker network to the whitelist
+ip_range_whitelist:
+  - '172.26.0.0/16'
+  - '0.0.0.0/0'
+
+# vim:ft=yaml
