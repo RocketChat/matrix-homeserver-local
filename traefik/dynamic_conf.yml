@@ -7,3 +7,7 @@ tls:
     # synapse2
     - certFile: "/etc/traefik/certs/synapse2.pem"
       keyFile: "/etc/traefik/certs/synapse2-key.pem"
+
+    # homeserver
+    - certFile: "/etc/traefik/certs/homeserver.pem"
+      keyFile: "/etc/traefik/certs/homeserver-key.pem"

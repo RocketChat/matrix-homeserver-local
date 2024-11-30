@@ -111,6 +111,7 @@ services:
     volumes:
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
       - ../homeserver:/usr/src/app
+      - ./traefik/certs/ca:/usr/local/share/ca-certificates
     networks:
       - matrix-network
     labels:

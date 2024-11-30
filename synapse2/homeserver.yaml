@@ -38,9 +38,9 @@ report_stats: false
 macaroon_secret_key: "Fmhd9e&JNHwv~^W~i4V1C~IxFBq@xBs+~l9in*SSr2:*.huO@:"
 form_secret: "HPR*^WvO,m-_Ev&gbRzpXj:aZzai*7IZk8^+,ShEN479~wnTW7"
 signing_key_path: "/data/synapse2.signing.key"
-trusted_key_servers:
-  - server_name: "matrix.org"
-    accept_keys_insecurely: true
+trusted_key_servers: []
+  # - server_name: "matrix.org"
+  #   accept_keys_insecurely: true
 federation_domain_whitelist:
   - synapse1:8448
   - synapse1:8008
