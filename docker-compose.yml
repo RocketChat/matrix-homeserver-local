@@ -51,9 +51,9 @@ services:
     networks:
       - matrix-network
 
-  synapse1_a:
+  synapse1:
     image: matrixdotorg/synapse:latest
-    container_name: synapse1_a
+    container_name: synapse1
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./synapse1:/data
@@ -65,21 +65,21 @@ services:
     #   - "8448:8448"  # Client and federation port for synapse1
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.synapse1_a.rule=Host(`synapse1`)"
+      - "traefik.http.routers.synapse1.rule=Host(`synapse1`)"
       # - "traefik.http.routers.synapse1.entrypoints=web"
-      - "traefik.http.routers.synapse1_a.entrypoints=websecure"
-      - "traefik.http.routers.synapse1_a.tls=true"
+      - "traefik.http.routers.synapse1.entrypoints=websecure"
+      - "traefik.http.routers.synapse1.tls=true"
       # - "traefik.http.routers.synapse1.tls.certresolver=myresolver"
-      - "traefik.http.services.synapse1_a.loadbalancer.server.port=8448"
+      - "traefik.http.services.synapse1.loadbalancer.server.port=8448"
       # - "traefik.tcp.routers.synapse1_federation.rule=HostSNI(`synapse1`)"
       # - "traefik.tcp.routers.synapse1_federation.entrypoints=matrix"
       # - "traefik.tcp.routers.synapse1_federation.tls=true"
       # # - "traefik.tcp.routers.synapse1_federation.tls.certresolver=myresolver"
       # - "traefik.tcp.services.synapse1_federation.loadbalancer.server.port=8448"
 
-  synapse2_a:
+  synapse2:
     image: matrixdotorg/synapse:latest
-    container_name: synapse2_a
+    container_name: synapse2
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./synapse2:/data
@@ -91,12 +91,12 @@ services:
     #   - "8449:8449"  # Client and federation port for synapse2
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.synapse2_a.rule=Host(`synapse2`)"
+      - "traefik.http.routers.synapse2.rule=Host(`synapse2`)"
       # - "traefik.http.routers.synapse2.entrypoints=web"
-      - "traefik.http.routers.synapse2_a.entrypoints=websecure"
-      - "traefik.http.routers.synapse2_a.tls=true"
+      - "traefik.http.routers.synapse2.entrypoints=websecure"
+      - "traefik.http.routers.synapse2.tls=true"
       # - "traefik.http.routers.synapse2.tls.certresolver=myresolver"
-      - "traefik.http.services.synapse2_a.loadbalancer.server.port=8448"
+      - "traefik.http.services.synapse2.loadbalancer.server.port=8448"
       # - "traefik.tcp.routers.synapse2_federation.rule=HostSNI(`synapse2`)"
       # - "traefik.tcp.routers.synapse2_federation.entrypoints=matrix"
       # - "traefik.tcp.routers.synapse2_federation.tls=true"
@@ -113,8 +113,8 @@ services:
     networks:
       - matrix-network
     depends_on:
-      - synapse1_a
-      - synapse2_a
+      - synapse1
+      - synapse2
 
 networks:
   matrix-network:
