@@ -8,6 +8,12 @@
 	Synapse2
 	`docker exec -it synapse2_a register_new_matrix_user http://localhost:8008 -c /data/homeserver.yaml`
 
+## Add to /etc/hosts
+	```
+		127.0.0.1       synapse1
+		127.0.0.1       synapse2
+	```
+
 ## Root CA
 	The root CA at `traefik/certs/ca/rootCA.crt` should be installed as system's  Root CA
 
