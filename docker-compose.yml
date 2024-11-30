@@ -127,8 +127,6 @@ services:
       - ../homeserver:/usr/src/app
     networks:
       - matrix-network
-    ports:
-      - "8081:8080"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.homeserver.rule=Host(`homeserver`)"
