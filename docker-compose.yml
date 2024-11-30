@@ -24,6 +24,7 @@ services:
         aliases:
           - synapse1
           - synapse2
+          - homeserver
 
   synapse1_well_known:
     image: nginx:alpine
@@ -48,6 +49,19 @@ services:
       - "traefik.http.routers.synapse2_wk.rule=Host(`synapse2`) && PathPrefix(`/.well-known`)"
       - "traefik.http.routers.synapse2_wk.entrypoints=websecure"
       - "traefik.http.routers.synapse2_wk.tls=true"
+    networks:
+      - matrix-network
+
+  homeserver_well_known:
+    image: nginx:alpine
+    container_name: homeserver_well_known
+    volumes:
+      - ./traefik/well-known/homeserver/.well-known:/usr/share/nginx/html/.well-known:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homeserver_wk.rule=Host(`homeserver`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.routers.homeserver_wk.entrypoints=websecure"
+      - "traefik.http.routers.homeserver_wk.tls=true"
     networks:
       - matrix-network
 
@@ -103,6 +117,24 @@ services:
       # # - "traefik.tcp.routers.synapse2_federation.tls.certresolver=myresolver"
       # - "traefik.tcp.services.synapse2_federation.loadbalancer.server.port=8448"
 
+  homeserver:
+    build:
+      context: ../homeserver
+    container_name: homeserver
+    # entrypoint: sh -c "update-ca-certificates && ./app"
+    volumes:
+      - ./traefik/certs/ca:/usr/local/share/ca-certificates
+    networks:
+      - matrix-network
+    ports:
+      - "8081:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homeserver.rule=Host(`homeserver`)"
+      - "traefik.http.routers.homeserver.entrypoints=websecure"
+      - "traefik.http.routers.homeserver.tls=true"
+      - "traefik.http.services.homeserver.loadbalancer.server.port=8080"
+
   element:
     image: vectorim/element-web
     container_name: element
@@ -115,6 +147,7 @@ services:
     depends_on:
       - synapse1
       - synapse2
+      - homeserver
 
 networks:
   matrix-network:

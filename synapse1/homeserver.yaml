@@ -58,6 +58,11 @@ federation_domain_whitelist:
   - synapse2:80
   - synapse2:443
   - synapse2
+  - homeserver:8448
+  - homeserver:8008
+  - homeserver:80
+  - homeserver:443
+  - homeserver
 federation_client_minimum_tls_version: 1
 federation_verify_certificates: false
 federation_certificate_verification_whitelist:
@@ -66,6 +71,11 @@ federation_certificate_verification_whitelist:
   - synapse2:80
   - synapse2:443
   - synapse2
+  - homeserver:8448
+  - homeserver:8008
+  - homeserver:80
+  - homeserver:443
+  - homeserver
 suppress_key_server_warning: true
 enable_registration: true
 enable_registration_without_verification: true
