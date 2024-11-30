@@ -107,7 +107,7 @@ services:
     build:
       context: ../homeserver
     container_name: homeserver
-    entrypoint: bun run --watch index.ts
+    entrypoint: sh -c "update-ca-certificates && bun run --watch index.ts"
     volumes:
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
       - ../homeserver:/usr/src/app
