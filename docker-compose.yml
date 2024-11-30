@@ -80,16 +80,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.synapse1.rule=Host(`synapse1`)"
-      # - "traefik.http.routers.synapse1.entrypoints=web"
       - "traefik.http.routers.synapse1.entrypoints=websecure"
       - "traefik.http.routers.synapse1.tls=true"
-      # - "traefik.http.routers.synapse1.tls.certresolver=myresolver"
       - "traefik.http.services.synapse1.loadbalancer.server.port=8448"
-      # - "traefik.tcp.routers.synapse1_federation.rule=HostSNI(`synapse1`)"
-      # - "traefik.tcp.routers.synapse1_federation.entrypoints=matrix"
-      # - "traefik.tcp.routers.synapse1_federation.tls=true"
-      # # - "traefik.tcp.routers.synapse1_federation.tls.certresolver=myresolver"
-      # - "traefik.tcp.services.synapse1_federation.loadbalancer.server.port=8448"
 
   synapse2:
     image: matrixdotorg/synapse:latest
@@ -106,16 +99,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.synapse2.rule=Host(`synapse2`)"
-      # - "traefik.http.routers.synapse2.entrypoints=web"
       - "traefik.http.routers.synapse2.entrypoints=websecure"
       - "traefik.http.routers.synapse2.tls=true"
-      # - "traefik.http.routers.synapse2.tls.certresolver=myresolver"
       - "traefik.http.services.synapse2.loadbalancer.server.port=8448"
-      # - "traefik.tcp.routers.synapse2_federation.rule=HostSNI(`synapse2`)"
-      # - "traefik.tcp.routers.synapse2_federation.entrypoints=matrix"
-      # - "traefik.tcp.routers.synapse2_federation.tls=true"
-      # # - "traefik.tcp.routers.synapse2_federation.tls.certresolver=myresolver"
-      # - "traefik.tcp.services.synapse2_federation.loadbalancer.server.port=8448"
 
   homeserver:
     build:
