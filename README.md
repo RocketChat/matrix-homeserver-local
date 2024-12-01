@@ -1,21 +1,30 @@
 ## Clone the homeserver repo to the parent directory
 
-	git clone https://github.com/ggazzo/homeserver.git ../homeserver
+```shell
+git clone https://github.com/ggazzo/homeserver.git ../homeserver
+```
 
 ## Creating users via command line
 
-### Synapse1
+### HomeServer 1 (Synapse)
 
-	docker exec -it synapse1 register_new_matrix_user http://localhost:8008 -c /data/homeserver.yaml
+```shell
+docker exec -it hs1 register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml
+```
 
-### Synapse2
-	docker exec -it synapse2 register_new_matrix_user http://localhost:8008 -c /data/homeserver.yaml
+### HomeServer 2 (Synapse)
+
+```shell
+docker exec -it hs2 register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml
+```
 
 ## Add to /etc/hosts
 
-	127.0.0.1       synapse1
-	127.0.0.1       synapse2
-	127.0.0.1				homeserver
+```
+127.0.0.1       hs1
+127.0.0.1       hs2
+127.0.0.1       rc1
+```
 
 ## Root CA
 
@@ -30,9 +39,11 @@ The root CA at `traefik/certs/ca/rootCA.crt` should be installed as system's  Ro
 
 Source: https://dkm10.hashnode.dev/install-certificates-on-wsl2
 
-	/usr/local/share/ca-certificates
-	sudo update-ca-certificates
+```shell
+/usr/local/share/ca-certificates
+sudo update-ca-certificates
+```
 
 ## Accessing Element
 
-Go to http://localhost:8080.
+Go to http://localhost:8080

@@ -1,5 +1,9 @@
 version: '3.7'
 
+networks:
+  matrix-network:
+    driver: bridge
+
 services:
   traefik:
     image: traefik:v2.9
@@ -22,99 +26,86 @@ services:
     networks:
       matrix-network:
         aliases:
-          - synapse1
-          - synapse2
-          - homeserver
+          - hs1
+          - hs2
+          - rc1
 
-  synapse1_well_known:
-    image: nginx:alpine
-    container_name: synapse1_well_known
-    volumes:
-      - ./traefik/well-known/synapse1/.well-known:/usr/share/nginx/html/.well-known:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.synapse1_wk.rule=Host(`synapse1`) && PathPrefix(`/.well-known`)"
-      - "traefik.http.routers.synapse1_wk.entrypoints=websecure"
-      - "traefik.http.routers.synapse1_wk.tls=true"
-    networks:
-      - matrix-network
 
-  synapse2_well_known:
-    image: nginx:alpine
-    container_name: synapse2_well_known
-    volumes:
-      - ./traefik/well-known/synapse2/.well-known:/usr/share/nginx/html/.well-known:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.synapse2_wk.rule=Host(`synapse2`) && PathPrefix(`/.well-known`)"
-      - "traefik.http.routers.synapse2_wk.entrypoints=websecure"
-      - "traefik.http.routers.synapse2_wk.tls=true"
-    networks:
-      - matrix-network
-
-  homeserver_well_known:
-    image: nginx:alpine
-    container_name: homeserver_well_known
-    volumes:
-      - ./traefik/well-known/homeserver/.well-known:/usr/share/nginx/html/.well-known:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homeserver_wk.rule=Host(`homeserver`) && PathPrefix(`/.well-known`)"
-      - "traefik.http.routers.homeserver_wk.entrypoints=websecure"
-      - "traefik.http.routers.homeserver_wk.tls=true"
-    networks:
-      - matrix-network
-
-  synapse1:
+# HomeServer 1 (synapse)
+  hs1c:
     image: matrixdotorg/synapse:latest
     # build:
     #   context: ../synapse
     #   dockerfile: ../synapse/docker/Dockerfile
-    container_name: synapse1
+    container_name: hs1c
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
-      - ./synapse1:/data
+      - ./hs1:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
       # - ../synapse/synapse:/synapse/synapse/
     networks:
       - matrix-network
-    # ports:
-    #   - "8008:8008"  # Client and federation port for synapse1
-    #   - "8448:8448"  # Client and federation port for synapse1
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.synapse1.rule=Host(`synapse1`)"
-      - "traefik.http.routers.synapse1.entrypoints=websecure"
-      - "traefik.http.routers.synapse1.tls=true"
-      - "traefik.http.services.synapse1.loadbalancer.server.port=8448"
+      - "traefik.http.routers.hs1.rule=Host(`hs1`)"
+      - "traefik.http.routers.hs1.entrypoints=websecure"
+      - "traefik.http.routers.hs1.tls=true"
+      - "traefik.http.services.hs1.loadbalancer.server.port=8448"
 
-  synapse2:
+  hs1_wk:
+    image: nginx:alpine
+    container_name: hs1_wk
+    volumes:
+      - ./traefik/well-known/hs1/.well-known:/usr/share/nginx/html/.well-known:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hs1_wk.rule=Host(`hs1`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.routers.hs1_wk.entrypoints=websecure"
+      - "traefik.http.routers.hs1_wk.tls=true"
+    networks:
+      - matrix-network
+
+
+# HomeServer 2 (synapse)
+  hs2c:
     image: matrixdotorg/synapse:latest
     # build:
     #   context: ../synapse
     #   dockerfile: ../synapse/docker/Dockerfile
-    container_name: synapse2
+    container_name: hs2c
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
-      - ./synapse2:/data
+      - ./hs2:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
       # - ../synapse/synapse:/synapse/synapse/
     networks:
       - matrix-network
-    # ports:
-    #   - "8009:8009"  # Client and federation port for synapse2
-    #   - "8449:8449"  # Client and federation port for synapse2
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.synapse2.rule=Host(`synapse2`)"
-      - "traefik.http.routers.synapse2.entrypoints=websecure"
-      - "traefik.http.routers.synapse2.tls=true"
-      - "traefik.http.services.synapse2.loadbalancer.server.port=8448"
+      - "traefik.http.routers.hs2.rule=Host(`hs2`)"
+      - "traefik.http.routers.hs2.entrypoints=websecure"
+      - "traefik.http.routers.hs2.tls=true"
+      - "traefik.http.services.hs2.loadbalancer.server.port=8448"
 
-  homeserver:
+  hs2_wk:
+    image: nginx:alpine
+    container_name: hs2_wk
+    volumes:
+      - ./traefik/well-known/hs2/.well-known:/usr/share/nginx/html/.well-known:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hs2_wk.rule=Host(`hs2`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.routers.hs2_wk.entrypoints=websecure"
+      - "traefik.http.routers.hs2_wk.tls=true"
+    networks:
+      - matrix-network
+
+
+# HomeServer 2 (synapse)
+  rc1c:
     build:
       context: ../homeserver
-    container_name: homeserver
+    container_name: rc1c
     entrypoint: sh -c "update-ca-certificates && bun run --watch index.ts"
     volumes:
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
@@ -123,11 +114,26 @@ services:
       - matrix-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.homeserver.rule=Host(`homeserver`)"
-      - "traefik.http.routers.homeserver.entrypoints=websecure"
-      - "traefik.http.routers.homeserver.tls=true"
-      - "traefik.http.services.homeserver.loadbalancer.server.port=8080"
+      - "traefik.http.routers.rc1.rule=Host(`rc1`)"
+      - "traefik.http.routers.rc1.entrypoints=websecure"
+      - "traefik.http.routers.rc1.tls=true"
+      - "traefik.http.services.rc1.loadbalancer.server.port=8080"
 
+  rc1_wk:
+    image: nginx:alpine
+    container_name: rc1_wk
+    volumes:
+      - ./traefik/well-known/rc1/.well-known:/usr/share/nginx/html/.well-known:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rc1_wk.rule=Host(`rc1`) && PathPrefix(`/.well-known`)"
+      - "traefik.http.routers.rc1_wk.entrypoints=websecure"
+      - "traefik.http.routers.rc1_wk.tls=true"
+    networks:
+      - matrix-network
+
+
+# Element
   element:
     image: vectorim/element-web
     container_name: element
@@ -138,10 +144,6 @@ services:
     networks:
       - matrix-network
     depends_on:
-      - synapse1
-      - synapse2
-      - homeserver
-
-networks:
-  matrix-network:
-    driver: bridge
+      - hs1c
+      - hs2c
+      - rc1c

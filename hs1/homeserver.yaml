@@ -9,8 +9,8 @@
 # For more information on how to configure Synapse, including a complete accounting of
 # each option, go to docs/usage/configuration/config_documentation.md or
 # https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
-server_name: "synapse1"
-pid_file: /data/homeserver.pid
+server_name: "hs1"
+pid_file: /data/hs1.pid
 # listeners:
 #   - port: 8448
 #     tls: false
@@ -41,41 +41,41 @@ use_x_forwarded_for: true
 database:
   name: sqlite3
   args:
-    database: /data/homeserver.db
-log_config: "/data/synapse1.log.config"
+    database: /data/hs1.db
+log_config: "/data/hs1.log.config"
 media_store_path: /data/media_store
 registration_shared_secret: "3l5H.Y5urc5@gKwYMe2^abk@nf.U_M6iyMgP,j&OL6pcSGrUQE"
 report_stats: false
 macaroon_secret_key: "3II&OLx=,6RcC&E~iksWi:tUU4J.~reK:MdU&JAPhlaGIL*+IA"
 form_secret: "B2EuUMKfg&.BsU;#DZ9;E,baB^wc=lV--F_PwkRLZvk=LHk+U4"
-signing_key_path: "/data/synapse1.signing.key"
+signing_key_path: "/data/hs1.signing.key"
 trusted_key_servers: []
   # - server_name: "matrix.org"
   #   accept_keys_insecurely: true
 federation_domain_whitelist:
-  - synapse2:8448
-  - synapse2:8008
-  - synapse2:80
-  - synapse2:443
-  - synapse2
-  - homeserver:8448
-  - homeserver:8008
-  - homeserver:80
-  - homeserver:443
-  - homeserver
+  - hs2:8448
+  - hs2:8008
+  - hs2:80
+  - hs2:443
+  - hs2
+  - rc1:8448
+  - rc1:8008
+  - rc1:80
+  - rc1:443
+  - rc1
 federation_client_minimum_tls_version: 1
 federation_verify_certificates: false
 federation_certificate_verification_whitelist:
-  - synapse2:8448
-  - synapse2:8008
-  - synapse2:80
-  - synapse2:443
-  - synapse2
-  - homeserver:8448
-  - homeserver:8008
-  - homeserver:80
-  - homeserver:443
-  - homeserver
+  - hs2:8448
+  - hs2:8008
+  - hs2:80
+  - hs2:443
+  - hs2
+  - rc1:8448
+  - rc1:8008
+  - rc1:80
+  - rc1:443
+  - rc1
 suppress_key_server_warning: true
 enable_registration: true
 enable_registration_without_verification: true
