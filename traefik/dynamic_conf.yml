@@ -1,9 +1,13 @@
 tls:
   certificates:
     # synapse1
-    - certFile: "/etc/traefik/certs/synapse1.pem"
-      keyFile: "/etc/traefik/certs/synapse1-key.pem"
+    - certFile: "/etc/traefik/certs/hs1.pem"
+      keyFile: "/etc/traefik/certs/hs1-key.pem"
 
     # synapse2
-    - certFile: "/etc/traefik/certs/synapse2.pem"
-      keyFile: "/etc/traefik/certs/synapse2-key.pem"
+    - certFile: "/etc/traefik/certs/hs2.pem"
+      keyFile: "/etc/traefik/certs/hs2-key.pem"
+
+    # rocket.chat1
+    - certFile: "/etc/traefik/certs/rc1.pem"
+      keyFile: "/etc/traefik/certs/rc1-key.pem"
