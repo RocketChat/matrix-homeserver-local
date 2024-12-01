@@ -4,36 +4,38 @@
 git clone https://github.com/ggazzo/homeserver.git ../homeserver
 ```
 
-## Creating users via command line
+## Run docker compose
 
-### HomeServer 1 (Synapse)
+```shell
+docker compose up --build
+```
+
+## Creating initial users via command line
+
+### HomeServers (Synapse)
 
 ```shell
 docker exec -it hs1 register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml
-```
-
-### HomeServer 2 (Synapse)
-
-```shell
 docker exec -it hs2 register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml
 ```
 
-## Add to /etc/hosts
+## Add DNS lookup to /etc/hosts
 
 ```
+sudo tee -a /etc/hosts <<EOF
 127.0.0.1       hs1
 127.0.0.1       hs2
 127.0.0.1       rc1
+EOF
 ```
 
-## Root CA
-
-The root CA at `traefik/certs/ca/rootCA.crt` should be installed as system's  Root CA
+## Install Root CA
 
 ### MacOS
 
-1. Double click the crt file
-2. Double click the installed certificate in Keychain Access and change to `Always Trust`
+```shell
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain traefik/certs/ca/rootCA.crt
+```
 
 ### WSL2 or Linux
 
