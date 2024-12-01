@@ -7,6 +7,7 @@ networks:
 services:
   traefik:
     image: traefik:v2.9
+    container_name: traefik
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -32,12 +33,12 @@ services:
 
 
 # HomeServer 1 (synapse)
-  hs1c:
+  hs1:
     image: matrixdotorg/synapse:latest
     # build:
     #   context: ../synapse
     #   dockerfile: ../synapse/docker/Dockerfile
-    container_name: hs1c
+    container_name: hs1
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./hs1:/data
@@ -67,12 +68,12 @@ services:
 
 
 # HomeServer 2 (synapse)
-  hs2c:
+  hs2:
     image: matrixdotorg/synapse:latest
     # build:
     #   context: ../synapse
     #   dockerfile: ../synapse/docker/Dockerfile
-    container_name: hs2c
+    container_name: hs2
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./hs2:/data
@@ -102,10 +103,10 @@ services:
 
 
 # HomeServer 2 (synapse)
-  rc1c:
+  rc1:
     build:
       context: ../homeserver
-    container_name: rc1c
+    container_name: rc1
     entrypoint: sh -c "update-ca-certificates && bun run --watch index.ts"
     volumes:
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
@@ -144,6 +145,6 @@ services:
     networks:
       - matrix-network
     depends_on:
-      - hs1c
-      - hs2c
-      - rc1c
+      - hs1
+      - hs2
+      - rc1
