@@ -11,6 +11,7 @@
 # https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 server_name: "hs2"
 pid_file: /data/hs2.pid
+
 listeners:
   - port: 8008
     tls: false
@@ -41,20 +42,8 @@ signing_key_path: "/data/hs2.signing.key"
 trusted_key_servers: []
   # - server_name: "matrix.org"
   #   accept_keys_insecurely: true
-federation_domain_whitelist:
-  - hs1:8448
-  - hs1:8008
-  - hs1:80
-  - hs1:443
-  - hs1
 federation_client_minimum_tls_version: 1
 federation_verify_certificates: false
-federation_certificate_verification_whitelist:
-  - hs1:8448
-  - hs1:8008
-  - hs1:80
-  - hs1:443
-  - hs1
 suppress_key_server_warning: true
 enable_registration: true
 enable_registration_without_verification: true
