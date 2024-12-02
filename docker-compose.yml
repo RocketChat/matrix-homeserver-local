@@ -108,6 +108,8 @@ services:
       context: ../homeserver
     container_name: rc1
     entrypoint: sh -c "update-ca-certificates && bun run --watch index.ts"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/rc1
     volumes:
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
       - ../homeserver:/usr/src/app
@@ -133,6 +135,29 @@ services:
     networks:
       - matrix-network
 
+
+# MongoDB
+  mongo:
+    image: docker.io/bitnami/mongodb:7.0
+    platform: linux/amd64
+    container_name: mongo
+    restart: on-failure
+    ports:
+      - 27018:27017
+    volumes:
+      - ./mongodb/data:/bitnami/mongodb
+    environment:
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_REPLICA_SET_NAME: ${MONGODB_REPLICA_SET_NAME:-rs0}
+      MONGODB_PORT_NUMBER: ${MONGODB_PORT_NUMBER:-27017}
+      MONGODB_INITIAL_PRIMARY_HOST: ${MONGODB_INITIAL_PRIMARY_HOST:-mongo}
+      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: ${MONGODB_INITIAL_PRIMARY_PORT_NUMBER:-27017}
+      MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_ADVERTISED_HOSTNAME:-mongo}
+      MONGODB_ENABLE_JOURNAL: ${MONGODB_ENABLE_JOURNAL:-true}
+      ALLOW_EMPTY_PASSWORD: ${ALLOW_EMPTY_PASSWORD:-yes}
+      EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU: 1 # This is required on Apple Silicon https://github.com/docker/for-mac/issues/6620
+    networks:
+      - matrix-network
 
 # Element
   element:
