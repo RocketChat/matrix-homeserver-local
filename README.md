@@ -1,7 +1,7 @@
 ## Clone the homeserver repo to the parent directory
 
 ```shell
-git clone https://github.com/ggazzo/homeserver.git ../homeserver
+git clone https://github.com/RocketChat/homeserver ../homeserver
 ```
 
 ## Run docker compose
