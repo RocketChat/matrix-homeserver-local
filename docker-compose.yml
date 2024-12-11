@@ -122,20 +122,6 @@ services:
       - "traefik.http.routers.rc1.tls=true"
       - "traefik.http.services.rc1.loadbalancer.server.port=8080"
 
-  rc1_wk:
-    image: nginx:alpine
-    container_name: rc1_wk
-    volumes:
-      - ./traefik/well-known/rc1/.well-known:/usr/share/nginx/html/.well-known:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.rc1_wk.rule=Host(`rc1`) && PathPrefix(`/.well-known`)"
-      - "traefik.http.routers.rc1_wk.entrypoints=websecure"
-      - "traefik.http.routers.rc1_wk.tls=true"
-    networks:
-      - matrix-network
-
-
 # MongoDB
   mongo:
     image: docker.io/bitnami/mongodb:7.0
