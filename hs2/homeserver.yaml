@@ -22,6 +22,8 @@ listeners:
 
 use_x_forwarded_for: true
 
+serve_server_wellknown: true
+
 database:
   name: sqlite3
   args:
