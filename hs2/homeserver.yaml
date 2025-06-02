@@ -19,12 +19,6 @@ listeners:
     x_forwarded: true
     resources:
       - names: [client, federation]
-  - port: 8448
-    tls: false
-    type: http
-    x_forwarded: true
-    resources:
-      - names: [federation, client]
 
 use_x_forwarded_for: true
 
