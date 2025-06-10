@@ -2,3 +2,4 @@
 media_store
 .DS_Store
 /mongodb/data
+docker-compose-linux.yml

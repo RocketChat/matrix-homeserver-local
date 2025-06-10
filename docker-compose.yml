@@ -2,23 +2,19 @@ version: '3.7'
 
 networks:
   matrix-network:
-    driver: bridge
 
 services:
   traefik:
     image: traefik:v2.9
-    container_name: traefik
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.matrix.address=:8448"
       - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
       - "443:443"
-      - "8448:8448"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
@@ -31,7 +27,6 @@ services:
           - hs2
           - rc1
 
-
 # HomeServer 1 (synapse)
   hs1:
     image: matrixdotorg/synapse:latest
@@ -43,7 +38,6 @@ services:
     volumes:
       - ./hs1:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
-      # - ../synapse/synapse:/synapse/synapse/
     networks:
       - matrix-network
     labels:
@@ -51,34 +45,16 @@ services:
       - "traefik.http.routers.hs1.rule=Host(`hs1`)"
       - "traefik.http.routers.hs1.entrypoints=websecure"
       - "traefik.http.routers.hs1.tls=true"
-      - "traefik.http.services.hs1.loadbalancer.server.port=8448"
-
-  hs1_wk:
-    image: nginx:alpine
-    container_name: hs1_wk
-    volumes:
-      - ./traefik/well-known/hs1/.well-known:/usr/share/nginx/html/.well-known:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.hs1_wk.rule=Host(`hs1`) && PathPrefix(`/.well-known`)"
-      - "traefik.http.routers.hs1_wk.entrypoints=websecure"
-      - "traefik.http.routers.hs1_wk.tls=true"
-    networks:
-      - matrix-network
-
+      - "traefik.http.services.hs1.loadbalancer.server.port=8008"
 
 # HomeServer 2 (synapse)
   hs2:
     image: matrixdotorg/synapse:latest
-    # build:
-    #   context: ../synapse
-    #   dockerfile: ../synapse/docker/Dockerfile
     container_name: hs2
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./hs2:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
-      # - ../synapse/synapse:/synapse/synapse/
     networks:
       - matrix-network
     labels:
@@ -86,21 +62,7 @@ services:
       - "traefik.http.routers.hs2.rule=Host(`hs2`)"
       - "traefik.http.routers.hs2.entrypoints=websecure"
       - "traefik.http.routers.hs2.tls=true"
-      - "traefik.http.services.hs2.loadbalancer.server.port=8448"
-
-  hs2_wk:
-    image: nginx:alpine
-    container_name: hs2_wk
-    volumes:
-      - ./traefik/well-known/hs2/.well-known:/usr/share/nginx/html/.well-known:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.hs2_wk.rule=Host(`hs2`) && PathPrefix(`/.well-known`)"
-      - "traefik.http.routers.hs2_wk.entrypoints=websecure"
-      - "traefik.http.routers.hs2_wk.tls=true"
-    networks:
-      - matrix-network
-
+      - "traefik.http.services.hs2.loadbalancer.server.port=8008"
 
 # HomeServer 2 (synapse)
   rc1:
@@ -122,26 +84,11 @@ services:
       - "traefik.http.routers.rc1.tls=true"
       - "traefik.http.services.rc1.loadbalancer.server.port=8080"
 
-# MongoDB
   mongo:
-    image: docker.io/bitnami/mongodb:7.0
-    platform: linux/amd64
+    image: mongo:7.0
     container_name: mongo
-    restart: on-failure
-    ports:
-      - 27018:27017
     volumes:
-      - ./mongodb/data:/bitnami/mongodb
-    environment:
-      MONGODB_REPLICA_SET_MODE: primary
-      MONGODB_REPLICA_SET_NAME: ${MONGODB_REPLICA_SET_NAME:-rs0}
-      MONGODB_PORT_NUMBER: ${MONGODB_PORT_NUMBER:-27017}
-      MONGODB_INITIAL_PRIMARY_HOST: ${MONGODB_INITIAL_PRIMARY_HOST:-mongo}
-      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: ${MONGODB_INITIAL_PRIMARY_PORT_NUMBER:-27017}
-      MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_ADVERTISED_HOSTNAME:-mongo}
-      MONGODB_ENABLE_JOURNAL: ${MONGODB_ENABLE_JOURNAL:-true}
-      ALLOW_EMPTY_PASSWORD: ${ALLOW_EMPTY_PASSWORD:-yes}
-      EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU: 1 # This is required on Apple Silicon https://github.com/docker/for-mac/issues/6620
+      - ./mongodb/data:/data/db
     networks:
       - matrix-network
 
@@ -159,3 +106,4 @@ services:
       - hs1
       - hs2
       - rc1
+
