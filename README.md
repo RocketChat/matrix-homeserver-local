@@ -23,9 +23,11 @@ docker exec -it hs2 register_new_matrix_user -u admin -p admin --admin http://lo
 
 ```
 sudo tee -a /etc/hosts <<EOF
+127.0.0.1       element
 127.0.0.1       hs1
 127.0.0.1       hs2
 127.0.0.1       rc1
+127.0.0.1       rc.host
 EOF
 ```
 
@@ -48,4 +50,24 @@ sudo update-ca-certificates
 
 ## Accessing Element
 
-Go to http://localhost:8080
+Go to https://element
+
+## Running Rocket.Chat locally
+
+While [use system CA](https://github.com/nodejs/node/issues/58990) for MacOS is not supported on NodeJS, it's
+necessary to manually point it to the extra certificate:
+
+```shell
+export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+```
+
+## Generating new certificates
+
+On MacOS use [mkcert](https://github.com/FiloSottile/mkcert)
+
+```shell
+brew install mkcert
+mkcert -install
+cd traefik/certs
+mkcert newdomain
+```
