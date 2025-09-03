@@ -2,6 +2,7 @@ networks:
   hs1-net:
   hs2-net:
   rc1-net:
+  rc2-net:
   rc_host-net:
   element-net:
 
@@ -29,36 +30,15 @@ services:
       # resolution which tries to communicate with the container directly some times and which does
       # not provide SSL neither the correct exposed ports.
       hs1-net:
-        aliases:
-          - hs1
-          - hs2
-          - rc1
-          - rc.host
+        aliases: [hs1, hs2, rc1, rc2, rc.host]
       hs2-net:
-        aliases:
-          - hs1
-          - hs2
-          - rc1
-          - rc.host
+        aliases: [hs1, hs2, rc1, rc2, rc.host]
       rc1-net:
-        aliases:
-          - hs1
-          - hs2
-          - rc1
-          - rc.host
+        aliases: [hs1, hs2, rc1, rc2, rc.host]
       rc_host-net:
-        aliases:
-          - hs1
-          - hs2
-          - rc1
-          - rc.host
+        aliases: [hs1, hs2, rc1, rc2, rc.host]
       element-net:
-        aliases:
-          - element
-          - hs1
-          - hs2
-          - rc1
-          - rc.host
+        aliases: [hs1, hs2, rc1, rc2, rc.host, element]
 
 # HomeServer 1 (synapse)
   hs1:
@@ -97,6 +77,9 @@ services:
       - "traefik.http.routers.hs2.entrypoints=websecure"
       - "traefik.http.routers.hs2.tls=true"
       - "traefik.http.services.hs2.loadbalancer.server.port=8008"
+    profiles:
+      - all
+      - hs2
 
 # Element
   element:
@@ -114,22 +97,26 @@ services:
       - "traefik.http.routers.element.entrypoints=websecure"
       - "traefik.http.routers.element.tls=true"
       - "traefik.http.services.element.loadbalancer.server.port=80"
-    depends_on:
-      - hs1
-      - hs2
 
 # Rocket.Chat rc1 (container)
   rc1:
     image: ghcr.io/rocketchat/rocket.chat:pr-36337.official@sha256:2bd6fa52bd2c1d702b3d131e5ee2e54e3a5be699fa4e2da021b6ab2b44a1df5a
     container_name: rc1
-    hostname: rc1_container
-    # entrypoint: sh -c "update-ca-certificates && node main.js"
     environment:
       ROOT_URL: https://rc1
       PORT: 3000
-      LOG_LEVEL: debug
       MONGO_URL: mongodb://mongo:27017/rc1?replicaSet=rs0
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/rootCA.pem
+      LOG_LEVEL: debug
+      ROCKETCHAT_LICENSE: ${ENTERPRISE_LICENSE_RC1}
+      OVERWRITE_SETTING_Show_Setup_Wizard: completed
+      OVERWRITE_SETTING_Federation_Service_Enabled: true
+      OVERWRITE_SETTING_Federation_Service_Matrix_Signing_Key: ${MATRIX_SIGNING_KEY_RC1}
+      OVERWRITE_SETTING_Cloud_Workspace_Client_Id: temp_id
+      OVERWRITE_SETTING_Cloud_Workspace_Client_Secret: temp_secret
+      ADMIN_USERNAME: admin
+      ADMIN_PASS: admin
+      ADMIN_EMAIL: admin@admin.com
     volumes:
       - ./traefik/certs/ca/rootCA.crt:/usr/local/share/ca-certificates/rootCA.pem
     networks:
@@ -142,6 +129,44 @@ services:
       - "traefik.http.routers.rc1.entrypoints=websecure"
       - "traefik.http.routers.rc1.tls=true"
       - "traefik.http.services.rc1.loadbalancer.server.port=3000"
+    profiles:
+      - all
+      - rc1
+
+# Rocket.Chat rc2 (container)
+  rc2:
+    image: ghcr.io/rocketchat/rocket.chat:pr-36337.official@sha256:2bd6fa52bd2c1d702b3d131e5ee2e54e3a5be699fa4e2da021b6ab2b44a1df5a
+    container_name: rc2
+    environment:
+      ROOT_URL: https://rc2
+      PORT: 3000
+      MONGO_URL: mongodb://mongo:27017/rc2?replicaSet=rs0
+      NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/rootCA.pem
+      LOG_LEVEL: debug
+      ROCKETCHAT_LICENSE: ${ENTERPRISE_LICENSE_RC2}
+      OVERWRITE_SETTING_Show_Setup_Wizard: completed
+      OVERWRITE_SETTING_Federation_Service_Enabled: true
+      OVERWRITE_SETTING_Federation_Service_Matrix_Signing_Key: ${MATRIX_SIGNING_KEY_RC2}
+      OVERWRITE_SETTING_Cloud_Workspace_Client_Id: temp_id
+      OVERWRITE_SETTING_Cloud_Workspace_Client_Secret: temp_secret
+      ADMIN_USERNAME: admin
+      ADMIN_PASS: admin
+      ADMIN_EMAIL: admin@admin.com
+    volumes:
+      - ./traefik/certs/ca/rootCA.crt:/usr/local/share/ca-certificates/rootCA.pem
+    networks:
+      - rc2-net
+    depends_on:
+      - mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rc2.rule=Host(`rc2`)"
+      - "traefik.http.routers.rc2.entrypoints=websecure"
+      - "traefik.http.routers.rc2.tls=true"
+      - "traefik.http.services.rc2.loadbalancer.server.port=3000"
+    profiles:
+      - all
+      - rc2
 
   mongo:
     image: ghcr.io/zcube/bitnami-compat/mongodb:6.0
@@ -159,3 +184,8 @@ services:
       - ./mongodb/data:/bitnami/mongodb
     networks:
       - rc1-net
+      - rc2-net
+    profiles:
+      - all
+      - rc1
+      - rc2

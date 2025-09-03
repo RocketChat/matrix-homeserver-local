@@ -1,8 +1,37 @@
 ## Run docker compose
 
+The compose runs only synapse and element by default, so you can run rocket.chat via localhost development mode:
 ```shell
 docker compose up
 ```
+
+By passing the profile flag you can spin up a rocket.chat container included
+```shell
+docker compose --profile rc1 up
+```
+
+By passing the profile `all` it will spin up 2 rocket.chat instances and a second synapse `hs2`
+```shell
+docker compose --profile all up
+```
+
+### Profiles
+- rc1 -> Spins up traefik, element, hs1 and rc1
+- rc2 -> Spins up traefik, element, hs1 and rc2
+- hs2 -> Spins up traefik, element, hs1 and hs2
+- all -> Spins up traefik, element, hs1, hs2, rc1 and rc2
+
+Multiples profiles can be passed like
+```shell
+docker compose --profile rc1 --profile hs2 up
+```
+
+### Rocket.Chat initial users
+Rocket.Chat will spin up with an administrator user configured with username `admin` and password `admin`
+
+### .env file
+It's possible to copy the `.env.example` to `.env` and include the certificates and matrix signing key to
+configure the services on startup.
 
 ## Creating initial users via command line
 
@@ -67,3 +96,11 @@ mkcert -install
 cd traefik/certs
 mkcert newdomain
 ```
+
+## Cleaning up all data from containers
+
+```shell
+make clean-all
+```
+
+Or use `make` to see other commands
