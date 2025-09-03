@@ -1,13 +1,7 @@
-## Clone the homeserver repo to the parent directory
-
-```shell
-git clone https://github.com/RocketChat/homeserver ../homeserver
-```
-
 ## Run docker compose
 
 ```shell
-docker compose up --build
+docker compose up
 ```
 
 ## Creating initial users via command line
@@ -60,6 +54,8 @@ necessary to manually point it to the extra certificate:
 ```shell
 export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
 ```
+
+Then it's possible to access it via `https://rc.host` which points to the host's machine port 3000
 
 ## Generating new certificates
 
