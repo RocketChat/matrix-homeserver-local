@@ -52,7 +52,7 @@ While [use system CA](https://github.com/nodejs/node/issues/58990) for MacOS is 
 necessary to manually point it to the extra certificate:
 
 ```shell
-export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+export NODE_EXTRA_CA_CERTS="$(PWD)/traefik/certs/ca/rootCA.crt"
 ```
 
 Then it's possible to access it via `https://rc.host` which points to the host's machine port 3000
