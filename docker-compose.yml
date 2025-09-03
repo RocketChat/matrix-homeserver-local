@@ -1,7 +1,9 @@
-version: '3.7'
-
 networks:
-  matrix-network:
+  hs1-net:
+  hs2-net:
+  rc1-net:
+  rc_host-net:
+  element-net:
 
 services:
   traefik:
@@ -21,7 +23,36 @@ services:
       - ./traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
       - ./traefik/certs:/etc/traefik/certs:ro
     networks:
-      matrix-network:
+      # Defines and isolate one network per service to prevent inter service communication which
+      # would not happen in real life. The name clashing between the host and service in the same
+      # network (like rc1 service provided as rc1 host) is causing a bug on home server address 
+      # resolution which tries to communicate with the container directly some times and which does
+      # not provide SSL neither the correct exposed ports.
+      hs1-net:
+        aliases:
+          - hs1
+          - hs2
+          - rc1
+          - rc.host
+      hs2-net:
+        aliases:
+          - hs1
+          - hs2
+          - rc1
+          - rc.host
+      rc1-net:
+        aliases:
+          - hs1
+          - hs2
+          - rc1
+          - rc.host
+      rc_host-net:
+        aliases:
+          - hs1
+          - hs2
+          - rc1
+          - rc.host
+      element-net:
         aliases:
           - element
           - hs1
@@ -41,7 +72,7 @@ services:
       - ./hs1:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
     networks:
-      - matrix-network
+      - hs1-net
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.hs1.rule=Host(`hs1`)"
@@ -53,46 +84,19 @@ services:
   hs2:
     image: matrixdotorg/synapse:v1.132.0
     container_name: hs2
+    hostname: hs2_container
     entrypoint: sh -c "update-ca-certificates && /start.py"
     volumes:
       - ./hs2:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
     networks:
-      - matrix-network
+      - hs2-net
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.hs2.rule=Host(`hs2`)"
       - "traefik.http.routers.hs2.entrypoints=websecure"
       - "traefik.http.routers.hs2.tls=true"
       - "traefik.http.services.hs2.loadbalancer.server.port=8008"
-
-# HomeServer 2 (synapse)
-  # rc1:
-  #   build:
-  #     context: ../homeserver
-  #   container_name: rc1
-  #   entrypoint: sh -c "update-ca-certificates && bun run --watch index.ts"
-  #   environment:
-  #     - MONGODB_URI=mongodb://mongo:27017/rc1
-  #   volumes:
-  #     - ./traefik/certs/ca:/usr/local/share/ca-certificates
-  #     - ../homeserver:/usr/src/app
-  #   networks:
-  #     - matrix-network
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.rc1.rule=Host(`rc1`)"
-  #     - "traefik.http.routers.rc1.entrypoints=websecure"
-  #     - "traefik.http.routers.rc1.tls=true"
-  #     - "traefik.http.services.rc1.loadbalancer.server.port=8080"
-
-  # mongo:
-  #   image: mongo:7.0
-  #   container_name: mongo
-  #   volumes:
-  #     - ./mongodb/data:/data/db
-  #   networks:
-  #     - matrix-network
 
 # Element
   element:
@@ -103,7 +107,7 @@ services:
     volumes:
       - ./element/config.json:/app/config.json
     networks:
-      - matrix-network
+      - element-net
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.element.rule=Host(`element`)"
@@ -113,5 +117,45 @@ services:
     depends_on:
       - hs1
       - hs2
-      # - rc1
 
+# Rocket.Chat rc1 (container)
+  rc1:
+    image: ghcr.io/rocketchat/rocket.chat:pr-36337.official@sha256:2bd6fa52bd2c1d702b3d131e5ee2e54e3a5be699fa4e2da021b6ab2b44a1df5a
+    container_name: rc1
+    hostname: rc1_container
+    # entrypoint: sh -c "update-ca-certificates && node main.js"
+    environment:
+      ROOT_URL: https://rc1
+      PORT: 3000
+      LOG_LEVEL: debug
+      MONGO_URL: mongodb://mongo:27017/rc1?replicaSet=rs0
+      NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/rootCA.pem
+    volumes:
+      - ./traefik/certs/ca/rootCA.crt:/usr/local/share/ca-certificates/rootCA.pem
+    networks:
+      - rc1-net
+    depends_on:
+      - mongo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rc1.rule=Host(`rc1`)"
+      - "traefik.http.routers.rc1.entrypoints=websecure"
+      - "traefik.http.routers.rc1.tls=true"
+      - "traefik.http.services.rc1.loadbalancer.server.port=3000"
+
+  mongo:
+    image: ghcr.io/zcube/bitnami-compat/mongodb:6.0
+    restart: on-failure
+    environment:
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_REPLICA_SET_NAME: rs0
+      MONGODB_PORT_NUMBER: 27017
+      MONGODB_INITIAL_PRIMARY_HOST: mongo
+      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: 27017
+      MONGODB_ADVERTISED_HOSTNAME: mongo
+      MONGODB_ENABLE_JOURNAL: true
+      ALLOW_EMPTY_PASSWORD: yes
+    volumes:
+      - ./mongodb/data:/bitnami/mongodb
+    networks:
+      - rc1-net

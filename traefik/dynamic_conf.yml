@@ -8,7 +8,11 @@ tls:
     - certFile: "/etc/traefik/certs/hs2.pem"
       keyFile: "/etc/traefik/certs/hs2-key.pem"
 
-    # rocket.chat1
+    # rocket.chat rc1 (container)
+    - certFile: "/etc/traefik/certs/rc1.pem"
+      keyFile: "/etc/traefik/certs/rc1-key.pem"
+
+    # rocket.chat rc.host (local)
     - certFile: "/etc/traefik/certs/rc.host.pem"
       keyFile: "/etc/traefik/certs/rc.host-key.pem"
 
@@ -18,15 +22,15 @@ tls:
 
 http:
   services:
-    rc1:
+    rc_host:
       loadBalancer:
         servers:
           - url: "http://host.docker.internal:3000"
         passHostHeader: true
 
   routers:
-    rc1:
+    rc_host:
       rule: "Host(`rc.host`)"
       entryPoints: ["websecure"]
       tls: true
-      service: "rc1"
+      service: "rc_host"
