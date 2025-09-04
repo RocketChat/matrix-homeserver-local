@@ -1,3 +1,36 @@
+## Project Setup (Recommended)
+
+To prepare your environment for development, simply run:
+
+```shell
+make setup
+```
+This will automatically:
+- Install the Root CA certificate for HTTPS (MacOS or Linux)
+- Add all required DNS entries from the project's hosts file to your `/etc/hosts`
+
+You will be prompted for your administrator password (sudo) if necessary.
+
+<details>
+<summary>Manual Setup (Advanced)</summary>
+
+## Manual Setup (Advanced)
+
+If you need to run steps individually, use the following commands:
+
+### Add DNS lookup to /etc/hosts
+```shell
+make apply-hosts
+```
+Checks each entry in the project's `hosts` file and adds only those missing to `/etc/hosts`.
+
+### Install Root CA
+```shell
+make install-root-ca
+```
+Installs the Root CA certificate for HTTPS. For MacOS, uses the `security` command. For Linux, copies the certificate and runs `update-ca-certificates`. For other systems, follow manual instructions.
+</details>
+
 ## Run docker compose
 
 The compose runs only synapse and element by default, so you can run rocket.chat via localhost development mode:
@@ -38,35 +71,8 @@ configure the services on startup.
 ### HomeServers (Synapse)
 
 ```shell
-docker exec -it hs1 register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml
-docker exec -it hs2 register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml
-```
-
-## Add DNS lookup to /etc/hosts
-
-To ensure that the domains used in the project are present in your machine's `/etc/hosts` file, run:
-
-```shell
-make apply-hosts
-```
-This command will check each entry in the project's `hosts` file and add to `/etc/hosts` only those that are missing.
-You will need to provide your administrator password (sudo).
-
-## Install Root CA
-
-### MacOS
-
-```shell
-sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain traefik/certs/ca/rootCA.crt
-```
-
-### WSL2 or Linux
-
-Source: https://dkm10.hashnode.dev/install-certificates-on-wsl2
-
-```shell
-/usr/local/share/ca-certificates
-sudo update-ca-certificates
+make create-user-hs1
+make create-user-hs2
 ```
 
 ## Accessing Element
