@@ -11,6 +11,7 @@ services:
     image: traefik:v2.9
     command:
       - "--api.insecure=true"
+      # - "--log.level=DEBUG"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -18,11 +19,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml:ro
       - ./traefik/certs:/etc/traefik/certs:ro
+      # - ./traefik-logs:/logs # Mount a volume for logs
     networks:
       # Defines and isolate one network per service to prevent inter service communication which
       # would not happen in real life. The name clashing between the host and service in the same
@@ -34,6 +37,8 @@ services:
       hs2-net:
         aliases: [hs1, hs2, rc1, rc2, rc.host]
       rc1-net:
+        aliases: [hs1, hs2, rc1, rc2, rc.host]
+      rc2-net:
         aliases: [hs1, hs2, rc1, rc2, rc.host]
       rc_host-net:
         aliases: [hs1, hs2, rc1, rc2, rc.host]
@@ -97,6 +102,10 @@ services:
       - "traefik.http.routers.element.entrypoints=websecure"
       - "traefik.http.routers.element.tls=true"
       - "traefik.http.services.element.loadbalancer.server.port=80"
+      # HTTPS Redirect
+      - "traefik.http.middlewares.element.redirectscheme.scheme=https"
+      - "traefik.http.routers.element-http.rule=Host(`element`)"
+      - "traefik.http.routers.element-http.middlewares=element"
 
 # Rocket.Chat rc1 (container)
   rc1:
@@ -129,6 +138,10 @@ services:
       - "traefik.http.routers.rc1.entrypoints=websecure"
       - "traefik.http.routers.rc1.tls=true"
       - "traefik.http.services.rc1.loadbalancer.server.port=3000"
+      # HTTPS Redirect
+      - "traefik.http.middlewares.rc1.redirectscheme.scheme=https"
+      - "traefik.http.routers.rc1-http.rule=Host(`rc1`)"
+      - "traefik.http.routers.rc1-http.middlewares=rc1"
     profiles:
       - all
       - rc1
@@ -164,6 +177,10 @@ services:
       - "traefik.http.routers.rc2.entrypoints=websecure"
       - "traefik.http.routers.rc2.tls=true"
       - "traefik.http.services.rc2.loadbalancer.server.port=3000"
+      # HTTPS Redirect
+      - "traefik.http.middlewares.rc2.redirectscheme.scheme=https"
+      - "traefik.http.routers.rc2-http.rule=Host(`rc2`)"
+      - "traefik.http.routers.rc2-http.middlewares=rc2"
     profiles:
       - all
       - rc2

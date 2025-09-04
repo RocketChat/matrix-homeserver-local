@@ -13,6 +13,7 @@ help:
 	@echo "  make create-user-hs1 - Create admin user in hs1"
 	@echo "  make create-user-hs2 - Create admin user in hs2"
 	@echo "  make create-users-hs - Create admin users in hs1 and hs2"
+	@echo "  make check-env       - Check if .env exists and required variables are set (auto-creates from .env.example if missing)"
 
 # Install Root CA depending on OS
 .PHONY: install-root-ca
@@ -36,6 +37,27 @@ install-root-ca:
 		echo "Unsupported OS. Please install the Root CA manually."; \
 	fi
 
+.PHONY: check-env
+check-env:
+	@if [ ! -f .env ]; then \
+		printf "\033[0;33m.env file not found. Creating from .env.example...\033[0m\n"; \
+		cp .env.example .env; \
+	fi; \
+	missing_vars=""; \
+	required_vars=`grep -E '^[A-Z0-9_]+=' .env.example | cut -d= -f1`; \
+	for var in $$required_vars; do \
+		if ! grep -Eq "^$$var=.+" .env; then \
+			missing_vars="$$missing_vars $$var"; \
+		fi; \
+	done; \
+	if [ -z "$$missing_vars" ]; then \
+		printf "\033[0;32m.env is configured with all required variables and values.\033[0m\n"; \
+	else \
+		printf "\033[0;31m.env is missing required values for:\033[0m\n"; \
+		for var in $$missing_vars; do \
+			printf "\033[31m  %s\033[0m\n" "$$var"; \
+		done; \
+	fi
 # Apply entries from the hosts file to the machine's /etc/hosts
 .PHONY: apply-hosts
 apply-hosts:
@@ -84,7 +106,9 @@ create-users-hs: create-user-hs1 create-user-hs2
 
 .PHONY: setup
 setup:
-	@printf "\033[1;36m\nRunning: make install-root-ca\033[0m\n\n"
+	@printf "\033[1;36m\n-> Running: make check-env\033[0m\n\n"
+	@$(MAKE) check-env | sed 's/^/  /'
+	@printf "\033[1;36m\n-> Running: make install-root-ca\033[0m\n\n"
 	@$(MAKE) install-root-ca | sed 's/^/  /'
-	@printf "\033[1;36m\nRunning: make apply-hosts\033[0m\n\n"
+	@printf "\033[1;36m\n-> Running: make apply-hosts\033[0m\n\n"
 	@$(MAKE) apply-hosts | sed 's/^/  /'

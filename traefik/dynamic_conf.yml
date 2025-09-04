@@ -12,6 +12,10 @@ tls:
     - certFile: "/etc/traefik/certs/rc1.pem"
       keyFile: "/etc/traefik/certs/rc1-key.pem"
 
+    # rocket.chat rc2 (container)
+    - certFile: "/etc/traefik/certs/rc2.pem"
+      keyFile: "/etc/traefik/certs/rc2-key.pem"
+
     # rocket.chat rc.host (local)
     - certFile: "/etc/traefik/certs/rc.host.pem"
       keyFile: "/etc/traefik/certs/rc.host-key.pem"
