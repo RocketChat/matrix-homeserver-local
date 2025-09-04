@@ -44,15 +44,13 @@ docker exec -it hs2 register_new_matrix_user -u admin -p admin --admin http://lo
 
 ## Add DNS lookup to /etc/hosts
 
+To ensure that the domains used in the project are present in your machine's `/etc/hosts` file, run:
+
+```shell
+make apply-hosts
 ```
-sudo tee -a /etc/hosts <<EOF
-127.0.0.1       element
-127.0.0.1       hs1
-127.0.0.1       hs2
-127.0.0.1       rc1
-127.0.0.1       rc.host
-EOF
-```
+This command will check each entry in the project's `hosts` file and add to `/etc/hosts` only those that are missing.
+You will need to provide your administrator password (sudo).
 
 ## Install Root CA
 
