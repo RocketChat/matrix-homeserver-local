@@ -62,18 +62,12 @@ docker compose --profile rc1 --profile hs2 up
 ### Rocket.Chat initial users
 Rocket.Chat will spin up with an administrator user configured with username `admin` and password `admin`
 
+### Synapse initial users
+Synapse will spin up with an administrator user configured with username `admin` and password `admin`
+
 ### .env file
 It's possible to copy the `.env.example` to `.env` and include the certificates and matrix signing key to
 configure the services on startup.
-
-## Creating initial users via command line
-
-### HomeServers (Synapse)
-
-```shell
-make create-user-hs1
-make create-user-hs2
-```
 
 ## Accessing Element
 

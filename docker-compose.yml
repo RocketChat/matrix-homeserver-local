@@ -52,7 +52,18 @@ services:
     #   context: ../synapse
     #   dockerfile: ../synapse/docker/Dockerfile
     container_name: hs1
-    entrypoint: sh -c "update-ca-certificates && /start.py"
+    entrypoint: |
+      sh -c
+      "update-ca-certificates && /start.py &
+      until curl -sf http://localhost:8008/_matrix/client/versions; do
+        echo '=====> Waiting for Synapse...';
+        sleep 2;
+      done;
+      echo '';
+      echo '=====> Running register_new_matrix_user...';
+      register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml | sed 's/^/=======> /';
+      echo '=====> Finished register_new_matrix_user.';
+      wait"
     volumes:
       - ./hs1:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
@@ -70,7 +81,18 @@ services:
     image: matrixdotorg/synapse:v1.132.0
     container_name: hs2
     hostname: hs2_container
-    entrypoint: sh -c "update-ca-certificates && /start.py"
+    entrypoint: |
+      sh -c
+      "update-ca-certificates && /start.py &
+      until curl -sf http://localhost:8008/_matrix/client/versions; do
+        echo '=====> Waiting for Synapse...';
+        sleep 2;
+      done;
+      echo '';
+      echo '=====> Running register_new_matrix_user...';
+      register_new_matrix_user -u admin -p admin --admin http://localhost:8008 -c /data/homeserver.yaml | sed 's/^/=======> /';
+      echo '=====> Finished register_new_matrix_user.';
+      wait"
     volumes:
       - ./hs2:/data
       - ./traefik/certs/ca:/usr/local/share/ca-certificates
