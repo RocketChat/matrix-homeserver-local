@@ -9,6 +9,7 @@ networks:
 services:
   traefik:
     image: traefik:v2.9
+    container_name: traefik
     command:
       - "--api.insecure=true"
       # - "--log.level=DEBUG"
@@ -208,19 +209,23 @@ services:
       - rc2
 
   mongo:
-    image: ghcr.io/zcube/bitnami-compat/mongodb:6.0
+    image: mongo:8.0
+    container_name: mongo
     restart: on-failure
-    environment:
-      MONGODB_REPLICA_SET_MODE: primary
-      MONGODB_REPLICA_SET_NAME: rs0
-      MONGODB_PORT_NUMBER: 27017
-      MONGODB_INITIAL_PRIMARY_HOST: mongo
-      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: 27017
-      MONGODB_ADVERTISED_HOSTNAME: mongo
-      MONGODB_ENABLE_JOURNAL: true
-      ALLOW_EMPTY_PASSWORD: yes
+    entrypoint: |
+      bash -c
+        "mongod --replSet rs0 --bind_ip_all &
+          sleep 2;
+          until mongosh --eval \"db.adminCommand('ping')\"; do 
+            echo '=====> Waiting for Mongo...';
+            sleep 1;
+          done;
+          echo '=====> Initiating ReplSet...';
+          mongosh --eval \"rs.initiate({_id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }]})\";
+          echo '=====> Initiating ReplSet done...';
+        wait"
     volumes:
-      - ./mongodb/data:/bitnami/mongodb
+      - ./mongodb/data:/data/db
     networks:
       - rc1-net
       - rc2-net
