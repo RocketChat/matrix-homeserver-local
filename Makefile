@@ -18,6 +18,11 @@ help:
 # Install Root CA depending on OS
 .PHONY: install-root-ca
 install-root-ca:
+	@printf "\033[0;33m+-------------------------------------------------+\033[0m\n"
+	@printf "\033[0;33m| May require sudo permissions to edit /etc/hosts |\033[0m\n"
+	@printf "\033[0;33m+-------------------------------------------------+\033[0m\n"
+	@echo ""
+
 	@if [ "$(shell uname)" = "Darwin" ]; then \
 		if security find-certificate -c "mkcert rocketchat" /Library/Keychains/System.keychain > /dev/null 2>&1; then \
 			printf "\033[0;32mRoot CA is already installed on MacOS.\033[0m\n"; \
@@ -106,9 +111,9 @@ create-users-hs: create-user-hs1 create-user-hs2
 
 .PHONY: setup
 setup:
-	@printf "\033[1;36m\n-> Running: make check-env\033[0m\n\n"
-	@$(MAKE) check-env | sed 's/^/  /'
 	@printf "\033[1;36m\n-> Running: make install-root-ca\033[0m\n\n"
 	@$(MAKE) install-root-ca | sed 's/^/  /'
 	@printf "\033[1;36m\n-> Running: make apply-hosts\033[0m\n\n"
 	@$(MAKE) apply-hosts | sed 's/^/  /'
+	@printf "\033[1;36m\n-> Running: make check-env\033[0m\n\n"
+	@$(MAKE) check-env | sed 's/^/  /'
