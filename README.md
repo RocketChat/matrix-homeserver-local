@@ -31,6 +31,15 @@ make install-root-ca
 Installs the Root CA certificate for HTTPS. For MacOS, uses the `security` command. For Linux, copies the certificate and runs `update-ca-certificates`. For other systems, follow manual instructions.
 </details>
 
+## Adding CA cert into Chrome on Linux
+Chrome on Linux doesn't get the CA certificate from the OS global repository.
+To add it manually follow the following instructions:
+
+1. Go to Chrome Settings/Privacy and Security
+2. Click Security and scroll down to "Manage Certificates"
+3. In Local Certificates, click Custom and next to Trusted Certificates click Import
+4. Import `/traefik/certs/ca/rootCA.crt`
+
 ## Run docker compose
 
 The compose runs only synapse and element by default, so you can run rocket.chat via localhost development mode:
