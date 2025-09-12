@@ -85,8 +85,11 @@ Go to https://element
 ## Running Rocket.Chat locally
 
 While [use system CA](https://github.com/nodejs/node/issues/58990) for MacOS is not supported on NodeJS, it's
-necessary to manually point it to the extra certificate:
+necessary to manually point it to the extra certificate.
 
+Run `make setup` or `make export-ca-cert` to add the CA path to the NodeJS Env Var.
+
+Or manually export the Env Var from this repository and use the same shell to run meteor:
 ```shell
 export NODE_EXTRA_CA_CERTS="$(PWD)/traefik/certs/ca/rootCA.crt"
 ```

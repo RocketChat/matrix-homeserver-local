@@ -7,6 +7,7 @@ help:
 	@echo "  make install-root-ca - Install Root CA depending on OS"
 	@echo "  make apply-hosts     - Add missing entries from project hosts file to /etc/hosts (shows green for added, gray for existing, yellow alert if sudo required)"
 	@echo "  make export-ca-cert  - Export NODE_EXTRA_CA_CERTS env var with CA cert path in your shell rc file (zsh/bash)"
+	@echo "  make remove-ca-cert  - Remove NODE_EXTRA_CA_CERTS export from your shell rc file (zsh/bash)"
 	@echo "\nManagement commands:"
 	@echo "  make clean-sqlite    - Remove SQLite data files (hs1 and hs2)"
 	@echo "  make clean-mongo     - Remove MongoDB data"
@@ -121,7 +122,7 @@ setup:
 	@printf "\033[1;36m\n-> Running: make check-env\033[0m\n\n"
 	@$(MAKE) check-env | sed 's/^/  /'
 
-# Exporta o path do certificado CA como variável de ambiente NODE_EXTRA_CA_CERTS no shell padrão
+# Export the CA cert path as NODE_EXTRA_CA_CERTS in the default shell rc file
 .PHONY: export-ca-cert
 export-ca-cert:
 	@CERT_PATH="$(PWD)/traefik/certs/ca/rootCA.crt"; \
@@ -131,17 +132,35 @@ export-ca-cert:
 	elif [ "$$SHELL" = "/bin/bash" ] || [ "$$SHELL" = "/usr/bin/bash" ]; then \
 		SHELL_RC="$$HOME/.bashrc"; \
 	else \
-		echo "Shell não suportado: $$SHELL"; exit 1; \
+		echo "Unsupported shell: $$SHELL"; exit 1; \
 	fi; \
 	if grep -q 'export NODE_EXTRA_CA_CERTS=' "$$SHELL_RC"; then \
 		if ! grep -q "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" "$$SHELL_RC"; then \
 			sed -i.bak '/export NODE_EXTRA_CA_CERTS=/d' "$$SHELL_RC"; \
 			echo "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
-			echo "Atualizado NODE_EXTRA_CA_CERTS em $$SHELL_RC"; \
+			echo "Updated NODE_EXTRA_CA_CERTS in $$SHELL_RC"; \
 		else \
-			echo "NODE_EXTRA_CA_CERTS já está configurado corretamente em $$SHELL_RC"; \
+			echo "NODE_EXTRA_CA_CERTS is already correctly set in $$SHELL_RC"; \
 		fi; \
 	else \
 		echo "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
-		echo "Adicionado NODE_EXTRA_CA_CERTS em $$SHELL_RC"; \
+		echo "Added NODE_EXTRA_CA_CERTS to $$SHELL_RC"; \
+	fi
+
+# Remove the NODE_EXTRA_CA_CERTS export from the shell rc file
+.PHONY: remove-ca-cert
+remove-ca-cert:
+	SHELL_RC=""; \
+	if [ "$$SHELL" = "/bin/zsh" ] || [ "$$SHELL" = "/usr/bin/zsh" ]; then \
+		SHELL_RC="$$HOME/.zshrc"; \
+	elif [ "$$SHELL" = "/bin/bash" ] || [ "$$SHELL" = "/usr/bin/bash" ]; then \
+		SHELL_RC="$$HOME/.bashrc"; \
+	else \
+		echo "Unsupported shell: $$SHELL"; exit 1; \
+	fi; \
+	if grep -q 'export NODE_EXTRA_CA_CERTS=' "$$SHELL_RC"; then \
+		sed -i.bak '/export NODE_EXTRA_CA_CERTS=/d' "$$SHELL_RC"; \
+		echo "Removed NODE_EXTRA_CA_CERTS from $$SHELL_RC"; \
+	else \
+		echo "NODE_EXTRA_CA_CERTS not found in $$SHELL_RC"; \
 	fi
