@@ -3,9 +3,10 @@
 .PHONY: help
 help:
 	@echo "Setup commands:"
-	@echo "  make setup           - Run all initial setup steps (Root CA install and hosts update, recommended)"
+	@echo "  make setup           - Run all initial setup steps (Root CA install, hosts update, export CA cert var, recommended)"
 	@echo "  make install-root-ca - Install Root CA depending on OS"
 	@echo "  make apply-hosts     - Add missing entries from project hosts file to /etc/hosts (shows green for added, gray for existing, yellow alert if sudo required)"
+	@echo "  make export-ca-cert  - Export NODE_EXTRA_CA_CERTS env var with CA cert path in your shell rc file (zsh/bash)"
 	@echo "\nManagement commands:"
 	@echo "  make clean-sqlite    - Remove SQLite data files (hs1 and hs2)"
 	@echo "  make clean-mongo     - Remove MongoDB data"
@@ -113,7 +114,34 @@ create-users-hs: create-user-hs1 create-user-hs2
 setup:
 	@printf "\033[1;36m\n-> Running: make install-root-ca\033[0m\n\n"
 	@$(MAKE) install-root-ca | sed 's/^/  /'
+	@printf "\033[1;36m\n-> Running: make export-ca-cert\033[0m\n\n"
+	@$(MAKE) export-ca-cert | sed 's/^/  /'
 	@printf "\033[1;36m\n-> Running: make apply-hosts\033[0m\n\n"
 	@$(MAKE) apply-hosts | sed 's/^/  /'
 	@printf "\033[1;36m\n-> Running: make check-env\033[0m\n\n"
 	@$(MAKE) check-env | sed 's/^/  /'
+
+# Exporta o path do certificado CA como variável de ambiente NODE_EXTRA_CA_CERTS no shell padrão
+.PHONY: export-ca-cert
+export-ca-cert:
+	@CERT_PATH="$(PWD)/traefik/certs/ca/rootCA.crt"; \
+	SHELL_RC=""; \
+	if [ "$$SHELL" = "/bin/zsh" ] || [ "$$SHELL" = "/usr/bin/zsh" ]; then \
+		SHELL_RC="$$HOME/.zshrc"; \
+	elif [ "$$SHELL" = "/bin/bash" ] || [ "$$SHELL" = "/usr/bin/bash" ]; then \
+		SHELL_RC="$$HOME/.bashrc"; \
+	else \
+		echo "Shell não suportado: $$SHELL"; exit 1; \
+	fi; \
+	if grep -q 'export NODE_EXTRA_CA_CERTS=' "$$SHELL_RC"; then \
+		if ! grep -q "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" "$$SHELL_RC"; then \
+			sed -i.bak '/export NODE_EXTRA_CA_CERTS=/d' "$$SHELL_RC"; \
+			echo "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
+			echo "Atualizado NODE_EXTRA_CA_CERTS em $$SHELL_RC"; \
+		else \
+			echo "NODE_EXTRA_CA_CERTS já está configurado corretamente em $$SHELL_RC"; \
+		fi; \
+	else \
+		echo "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
+		echo "Adicionado NODE_EXTRA_CA_CERTS em $$SHELL_RC"; \
+	fi
