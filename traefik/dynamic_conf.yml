@@ -38,3 +38,15 @@ http:
       entryPoints: ["websecure"]
       tls: true
       service: "rc_host"
+    rc_host_http:
+      rule: "Host(`rc.host`)"
+      entryPoints: ["web"]
+      service: "rc_host"
+      middlewares:
+        - redirect-to-https
+
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true

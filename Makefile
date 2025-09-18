@@ -137,13 +137,13 @@ export-ca-cert:
 	if grep -q 'export NODE_EXTRA_CA_CERTS=' "$$SHELL_RC"; then \
 		if ! grep -q "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" "$$SHELL_RC"; then \
 			sed -i.bak '/export NODE_EXTRA_CA_CERTS=/d' "$$SHELL_RC"; \
-			echo "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
+			echo "\nexport NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
 			echo "Updated NODE_EXTRA_CA_CERTS in $$SHELL_RC"; \
 		else \
 			echo "NODE_EXTRA_CA_CERTS is already correctly set in $$SHELL_RC"; \
 		fi; \
 	else \
-		echo "export NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
+		echo "\nexport NODE_EXTRA_CA_CERTS=\"$$CERT_PATH\"" >> "$$SHELL_RC"; \
 		echo "Added NODE_EXTRA_CA_CERTS to $$SHELL_RC"; \
 	fi
 
