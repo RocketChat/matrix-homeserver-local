@@ -34,17 +34,17 @@ services:
       # resolution which tries to communicate with the container directly some times and which does
       # not provide SSL neither the correct exposed ports.
       hs1-net:
-        aliases: [hs1, hs2, rc1, rc2, rc.host]
+        aliases: [hs1, hs2, rc1, rc2, rc.host, rocketchat.host]
       hs2-net:
-        aliases: [hs1, hs2, rc1, rc2, rc.host]
+        aliases: [hs1, hs2, rc1, rc2, rc.host, rocketchat.host]
       rc1-net:
-        aliases: [hs1, hs2, rc1, rc2, rc.host]
+        aliases: [hs1, hs2, rc1, rc2, rc.host, rocketchat.host]
       rc2-net:
-        aliases: [hs1, hs2, rc1, rc2, rc.host]
+        aliases: [hs1, hs2, rc1, rc2, rc.host, rocketchat.host]
       rc_host-net:
-        aliases: [hs1, hs2, rc1, rc2, rc.host]
+        aliases: [hs1, hs2, rc1, rc2, rc.host, rocketchat.host]
       element-net:
-        aliases: [hs1, hs2, rc1, rc2, rc.host, element]
+        aliases: [hs1, hs2, rc1, rc2, rc.host, rocketchat.host, element]
 
 # HomeServer 1 (synapse)
   hs1:
@@ -132,7 +132,7 @@ services:
 
 # Rocket.Chat rc1 (container)
   rc1:
-    image: ghcr.io/rocketchat/rocket.chat:pr-36337.official@sha256:2bd6fa52bd2c1d702b3d131e5ee2e54e3a5be699fa4e2da021b6ab2b44a1df5a
+    image: ghcr.io/rocketchat/rocket.chat:pr-36970.official
     container_name: rc1
     environment:
       ROOT_URL: https://rc1
@@ -171,7 +171,7 @@ services:
 
 # Rocket.Chat rc2 (container)
   rc2:
-    image: ghcr.io/rocketchat/rocket.chat:pr-36337.official@sha256:2bd6fa52bd2c1d702b3d131e5ee2e54e3a5be699fa4e2da021b6ab2b44a1df5a
+    image: ghcr.io/rocketchat/rocket.chat:pr-36970.official
     container_name: rc2
     environment:
       ROOT_URL: https://rc2
@@ -233,3 +233,21 @@ services:
       - all
       - rc1
       - rc2
+
+  well-known:
+    image: nginx:latest
+    container_name: well-known
+    volumes:
+      - ./nginx/matrix.conf:/etc/nginx/conf.d/matrix.conf
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.well-known.rule=Host(`rocketchat.host`)"
+      - "traefik.http.services.well-known.loadbalancer.server.port=80"
+      - "traefik.http.routers.well-known.entrypoints=websecure"
+      - "traefik.http.routers.well-known.tls=true"
+      # HTTPS Redirect
+      - "traefik.http.middlewares.well-known.redirectscheme.scheme=https"
+      - "traefik.http.routers.well-known-http.rule=Host(`well-known`)"
+      - "traefik.http.routers.well-known-http.middlewares=well-known"
+    networks:
+      - rc_host-net
