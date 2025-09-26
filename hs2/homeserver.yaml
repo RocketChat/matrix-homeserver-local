@@ -43,6 +43,7 @@ federation_verify_certificates: false
 suppress_key_server_warning: true
 enable_registration: true
 enable_registration_without_verification: true
+allow_public_rooms_over_federation: true
 password_config:
   enabled: true
   localdb_enabled: true
