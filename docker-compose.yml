@@ -48,7 +48,7 @@ services:
 
 # HomeServer 1 (synapse)
   hs1:
-    image: matrixdotorg/synapse:v1.132.0
+    image: matrixdotorg/synapse:latest
     # build:
     #   context: ../synapse
     #   dockerfile: ../synapse/docker/Dockerfile
@@ -82,7 +82,7 @@ services:
 
 # HomeServer 2 (synapse)
   hs2:
-    image: matrixdotorg/synapse:v1.132.0
+    image: matrixdotorg/synapse:latest
     container_name: hs2
     hostname: hs2_container
     entrypoint: |
@@ -138,7 +138,7 @@ services:
 
 # Rocket.Chat rc1 (container)
   rc1:
-    image: ghcr.io/rocketchat/rocket.chat:pr-36970.official
+    image: rocketchat/rocket.chat:7.11.0-rc.0
     container_name: rc1
     environment:
       ROOT_URL: https://rc1
@@ -149,6 +149,7 @@ services:
       ROCKETCHAT_LICENSE: ${ENTERPRISE_LICENSE_RC1}
       OVERWRITE_SETTING_Show_Setup_Wizard: completed
       OVERWRITE_SETTING_Federation_Service_Enabled: true
+      OVERWRITE_SETTING_Federation_Service_Domain: rc1
       OVERWRITE_SETTING_Federation_Service_Matrix_Signing_Key: ${MATRIX_SIGNING_KEY_RC1}
       OVERWRITE_SETTING_Cloud_Workspace_Client_Id: temp_id
       OVERWRITE_SETTING_Cloud_Workspace_Client_Secret: temp_secret
@@ -177,7 +178,7 @@ services:
 
 # Rocket.Chat rc2 (container)
   rc2:
-    image: ghcr.io/rocketchat/rocket.chat:pr-36970.official
+    image: rocketchat/rocket.chat:7.11.0-rc.0
     container_name: rc2
     environment:
       ROOT_URL: https://rc2
@@ -188,6 +189,7 @@ services:
       ROCKETCHAT_LICENSE: ${ENTERPRISE_LICENSE_RC2}
       OVERWRITE_SETTING_Show_Setup_Wizard: completed
       OVERWRITE_SETTING_Federation_Service_Enabled: true
+      OVERWRITE_SETTING_Federation_Service_Domain: rc2
       OVERWRITE_SETTING_Federation_Service_Matrix_Signing_Key: ${MATRIX_SIGNING_KEY_RC2}
       OVERWRITE_SETTING_Cloud_Workspace_Client_Id: temp_id
       OVERWRITE_SETTING_Cloud_Workspace_Client_Secret: temp_secret
